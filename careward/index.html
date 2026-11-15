@@ -1,0 +1,899 @@
+<title>Careward</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: one narrow work column (phone-first for staff), widening to a two-column desk for the DON on a laptop. */
+:root {
+  --bg: #f3f5f7;
+  --surface: #ffffff;
+  --ink: #16212e;
+  --muted: #5a6776;
+  --line: #d9dfe6;
+  --accent: #1d5c8c;        /* care blue: primary actions */
+  --accent-ink: #ffffff;
+  --accent-soft: #e4eef6;
+  --read: #4b4fb0;          /* "I read the update" */
+  --read-soft: #ebebfa;
+  --submit: #9a5b00;        /* "I submitted the work" */
+  --submit-soft: #fbf0dc;
+  --verify: #1f7a4a;        /* "I verified the result" */
+  --verify-soft: #e1f3e8;
+  --danger: #b3261e;
+  --danger-soft: #fbe7e5;
+  --practice: #7a5a00;
+  --practice-soft: #fff6d6;
+  --font-body: "Public Sans", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --r: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f151c; --surface: #17202a; --ink: #e6ecf2; --muted: #9aa8b6; --line: #2a3644;
+    --accent: #6fb0e3; --accent-ink: #0b1a26; --accent-soft: #1a2d3d;
+    --read: #a4a7f2; --read-soft: #23244a; --submit: #f0b45a; --submit-soft: #3a2a10;
+    --verify: #6fd39b; --verify-soft: #12301f; --danger: #f2877f; --danger-soft: #3a1714;
+    --practice: #f1cf6b; --practice-soft: #332a0c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f151c; --surface: #17202a; --ink: #e6ecf2; --muted: #9aa8b6; --line: #2a3644;
+  --accent: #6fb0e3; --accent-ink: #0b1a26; --accent-soft: #1a2d3d;
+  --read: #a4a7f2; --read-soft: #23244a; --submit: #f0b45a; --submit-soft: #3a2a10;
+  --verify: #6fd39b; --verify-soft: #12301f; --danger: #f2877f; --danger-soft: #3a1714;
+  --practice: #f1cf6b; --practice-soft: #332a0c;
+  color-scheme: dark;
+}
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink); font-family: var(--font-body);
+  font-size: 16px; line-height: 1.5; margin: 0;
+}
+h1, h2, h3 { line-height: 1.2; text-wrap: balance; margin: 0; }
+h1 { font-size: 1.5rem; font-weight: 800; }
+h2 { font-size: 1.15rem; font-weight: 700; }
+h3 { font-size: 1rem; font-weight: 700; }
+p { margin: 0; }
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); }
+.small { font-size: 0.85rem; }
+.label { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; font-weight: 700; color: var(--muted); }
+
+/* Top bar */
+.topbar { background: var(--surface); border-bottom: 1px solid var(--line); }
+.topbar-inner, .wrap {
+  max-width: 1100px; margin: 0 auto;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+.topbar-inner { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 16px; padding-block: 12px; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.15rem; letter-spacing: -0.01em; }
+.brand-mark { width: 28px; height: 28px; flex: none; }
+.view-tag { font-size: 0.75rem; font-weight: 700; padding: 2px 8px; border-radius: 999px; background: var(--accent-soft); color: var(--accent); }
+.topbar .who { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 0.9rem; }
+.practice-band { background: var(--practice-soft); color: var(--practice); font-size: 0.82rem; }
+.practice-band .wrap { padding-block: 6px; display: flex; flex-wrap: wrap; gap: 4px 16px; justify-content: space-between; }
+
+.wrap.main { padding-block: 20px 48px; display: grid; gap: 20px; }
+
+/* Panels */
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 18px; display: grid; gap: 14px; min-width: 0; }
+.panel-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: 6px 12px; }
+.grid-2 { display: grid; gap: 20px; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: start; }
+@media (max-width: 860px) { .grid-2 { grid-template-columns: minmax(0, 1fr); } }
+
+/* Forms */
+.field { display: grid; gap: 4px; }
+.field label { font-weight: 600; font-size: 0.92rem; }
+.field .hint { font-size: 0.8rem; color: var(--muted); }
+.row { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); }
+input[type="text"], input[type="date"], input[type="password"], select, textarea {
+  font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line);
+  border-radius: 8px; padding: 10px 12px; width: 100%;
+}
+textarea { min-height: 96px; resize: vertical; }
+input:focus-visible, select:focus-visible, textarea:focus-visible, button:focus-visible, a:focus-visible {
+  outline: 3px solid var(--accent); outline-offset: 2px;
+}
+.btn {
+  font: inherit; font-weight: 700; border: 1px solid transparent; border-radius: 8px;
+  padding: 11px 16px; cursor: pointer; background: var(--accent); color: var(--accent-ink);
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px;
+}
+.btn.secondary { background: transparent; color: var(--accent); border-color: var(--line); }
+.btn.ghost { background: transparent; color: var(--muted); border-color: transparent; padding-inline: 8px; min-height: 36px; font-weight: 600; }
+.btn.danger { background: var(--danger); color: #fff; }
+.btn.read { background: var(--read); color: var(--surface); }
+.btn.submit { background: var(--submit); color: var(--surface); }
+.btn.verify { background: var(--verify); color: var(--surface); }
+.btn.block { width: 100%; }
+.btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.error { color: var(--danger); font-size: 0.88rem; font-weight: 600; }
+
+/* Chips */
+.chip { display: inline-flex; align-items: center; gap: 6px; font-size: 0.78rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; white-space: nowrap; }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: currentColor; }
+.chip.assigned { background: var(--accent-soft); color: var(--accent); }
+.chip.acknowledged { background: var(--read-soft); color: var(--read); }
+.chip.submitted { background: var(--submit-soft); color: var(--submit); }
+.chip.verified { background: var(--verify-soft); color: var(--verify); }
+.chip.returned, .chip.overdue { background: var(--danger-soft); color: var(--danger); }
+
+/* Citation card, styled after a CMS-2567 line */
+.cite { border: 1px solid var(--line); border-radius: 8px; overflow: hidden; }
+.cite-head { display: flex; flex-wrap: wrap; gap: 6px 18px; padding: 10px 14px; background: var(--bg); border-bottom: 1px solid var(--line); }
+.cite-head div { display: grid; }
+.cite-body { padding: 12px 14px; display: grid; gap: 8px; }
+.tag-big { font-family: var(--font-mono); font-weight: 500; font-size: 1.1rem; }
+
+/* The three stamped actions */
+.stamps { display: grid; gap: 10px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 640px) { .stamps { grid-template-columns: minmax(0, 1fr); } }
+.stamp { border: 1.5px dashed var(--line); border-radius: 8px; padding: 10px 12px; display: grid; gap: 2px; min-width: 0; }
+.stamp .stamp-title { font-weight: 700; font-size: 0.92rem; }
+.stamp .stamp-meta { font-size: 0.8rem; color: var(--muted); overflow-wrap: anywhere; }
+.stamp.done { border-style: solid; }
+.stamp.read.done { border-color: var(--read); background: var(--read-soft); }
+.stamp.read.done .stamp-title { color: var(--read); }
+.stamp.submit.done { border-color: var(--submit); background: var(--submit-soft); }
+.stamp.submit.done .stamp-title { color: var(--submit); }
+.stamp.verify.done { border-color: var(--verify); background: var(--verify-soft); }
+.stamp.verify.done .stamp-title { color: var(--verify); }
+
+/* Checklist */
+.checklist { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.check { display: flex; gap: 12px; align-items: flex-start; padding: 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); }
+.check input { width: 22px; height: 22px; margin-top: 1px; flex: none; accent-color: var(--accent); }
+.check .mark { width: 22px; height: 22px; flex: none; border-radius: 5px; border: 2px solid var(--line); display: grid; place-items: center; font-weight: 800; font-size: 0.85rem; }
+.check .mark.on { background: var(--verify); border-color: var(--verify); color: var(--surface); }
+
+/* Activity log */
+.log { list-style: none; margin: 0; padding: 0; display: grid; gap: 0; }
+.log li { display: grid; grid-template-columns: 9.5rem minmax(0, 1fr); gap: 12px; padding: 8px 0; border-top: 1px solid var(--line); font-size: 0.88rem; }
+.log li:first-child { border-top: 0; }
+@media (max-width: 520px) { .log li { grid-template-columns: minmax(0, 1fr); gap: 2px; } }
+
+.notice { padding: 12px 14px; border-radius: 8px; font-size: 0.92rem; }
+.notice.info { background: var(--accent-soft); }
+.notice.warn { background: var(--submit-soft); }
+.notice.bad { background: var(--danger-soft); color: var(--danger); }
+.notice.good { background: var(--verify-soft); }
+
+/* Sign-in */
+.signin { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+.accounts { display: grid; gap: 10px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+.account { text-align: left; font: inherit; color: inherit; background: var(--surface); border: 1.5px solid var(--line); border-radius: var(--r); padding: 14px; cursor: pointer; display: grid; gap: 2px; }
+.account:hover { border-color: var(--accent); }
+.account.selected { border-color: var(--accent); background: var(--accent-soft); }
+.account .name { font-weight: 700; }
+.pin { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
+
+/* Staff phone layout */
+.phone { max-width: 560px; margin: 0 auto; width: 100%; display: grid; gap: 16px; }
+.task-link { text-align: left; font: inherit; color: inherit; width: 100%; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: 16px; cursor: pointer; display: grid; gap: 8px; }
+.step-num { font-family: var(--font-mono); font-size: 0.8rem; color: var(--muted); }
+
+.record { font-family: var(--font-mono); font-size: 0.8rem; min-height: 220px; background: var(--bg); }
+.kv { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 4px 14px; font-size: 0.92rem; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; overflow-wrap: anywhere; }
+.loading { padding: 40px 0; text-align: center; color: var(--muted); }
+@media (prefers-reduced-motion: no-preference) { .flash { animation: flash 1.2s ease-out; } }
+@keyframes flash { from { box-shadow: 0 0 0 4px var(--accent-soft); } to { box-shadow: 0 0 0 0 transparent; } }
+</style>
+
+<header class="topbar">
+  <div class="topbar-inner" id="topbar">
+    <div class="brand">
+      <svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="7" fill="var(--accent)"/><path d="M8 14.5l4 4 8-9" fill="none" stroke="var(--accent-ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Careward
+    </div>
+  </div>
+</header>
+<div class="practice-band"><div class="wrap"><span><strong>Practice mode.</strong> Fictional facility, people and citation. Not a real survey record.</span><span id="store-status">Connecting…</span></div></div>
+<main class="wrap main" id="app"><div class="loading">Loading Careward…</div></main>
+
+<script>
+(function () {
+  "use strict";
+
+  /* ------------------------------------------------------------------ *
+   * Fictional facility and demo accounts (simulated sign-in).          *
+   * ------------------------------------------------------------------ */
+  var FACILITY = { name: "Bluff Ridge Care Center", city: "Godfrey, Illinois", beds: 46, id: "BRCC-DEMO" };
+  var ACCOUNTS = [
+    { id: "don-dana", name: "Dana Whitfield, RN", first: "Dana", role: "don", title: "Director of Nursing", shift: "Days", pin: "1111" },
+    { id: "cna-marcus", name: "Marcus Reyes, CNA", first: "Marcus", role: "staff", title: "Certified Nursing Assistant", shift: "Nights (10p–6a)", pin: "2222" },
+    { id: "lpn-priya", name: "Priya Shah, LPN", first: "Priya", role: "staff", title: "Licensed Practical Nurse", shift: "Nights (10p–6a)", pin: "3333" },
+    { id: "cna-tom", name: "Tom Alvarez, CNA", first: "Tom", role: "staff", title: "Certified Nursing Assistant", shift: "Days (6a–2p)", pin: "4444" }
+  ];
+  var STAFF = ACCOUNTS.filter(function (a) { return a.role === "staff"; });
+  function acct(id) { for (var i = 0; i < ACCOUNTS.length; i++) if (ACCOUNTS[i].id === id) return ACCOUNTS[i]; return null; }
+
+  var PRACTICE_CITATION = {
+    tag: "F880",
+    title: "Infection Prevention & Control",
+    surveyDate: offsetDate(-6),
+    scope: "E",
+    statement: "PRACTICE EXAMPLE. Based on observation, interview, and record review, the facility failed to ensure staff performed hand hygiene between residents and when moving from a soiled to a clean task during incontinence care for 2 of 4 residents observed (R3, R7) on the night shift. Alcohol-based hand rub dispensers outside rooms 104 and 112 were empty. This failed practice had the potential to affect all 46 residents.",
+    residents: "R3, R7 (fictional)"
+  };
+  var PRACTICE_ACTION = {
+    title: "Hand hygiene return demonstration and hall restock — night shift",
+    instructions: "Our practice survey found missed hand hygiene during night-shift incontinence care, and two empty hand-rub dispensers on 100 Hall.\n\nBefore the end of your next shift:\n1. Review the hand hygiene steps with the charge nurse.\n2. Show the charge nurse how you clean your hands and change gloves when going from a soiled task to a clean task.\n3. Check every hand-rub dispenser on 100 Hall (rooms 101–118) and refill any that are low.",
+    proof: "Charge nurse name who watched your return demonstration, and which dispensers you refilled.",
+    checklist: "Reviewed the hand hygiene steps with the charge nurse\nPerformed hand hygiene before and after care for each resident on my assignment\nChanged gloves and cleaned hands when moving from a soiled task to a clean task (return demonstration observed)\nChecked all hand-rub dispensers on 100 Hall and refilled any that were low"
+  };
+
+  /* ------------------------------------------------------------------ *
+   * Small helpers                                                      *
+   * ------------------------------------------------------------------ */
+  function esc(s) {
+    return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function nl2br(s) { return esc(s).replace(/\n/g, "<br>"); }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+  function ymd(d) { return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate()); }
+  function offsetDate(days) { var d = new Date(); d.setDate(d.getDate() + days); return ymd(d); }
+  function todayYmd() { return ymd(new Date()); }
+  function uid(p) { return p + "-" + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function fmtStamp(iso) {
+    if (!iso) return "";
+    var d = new Date(iso);
+    return d.toLocaleString(undefined, { month: "short", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", second: "2-digit" });
+  }
+  function fmtDate(s) {
+    if (!s) return "";
+    var p = s.split("-"); var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    return d.toLocaleDateString(undefined, { weekday: "short", month: "short", day: "numeric", year: "numeric" });
+  }
+  function clone(o) { return JSON.parse(JSON.stringify(o)); }
+  function lsGet(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { window.localStorage.setItem(k, v); } catch (e) {} }
+  function lsDel(k) { try { window.localStorage.removeItem(k); } catch (e) {} }
+
+  /* ------------------------------------------------------------------ *
+   * State and storage                                                  *
+   *   Shared mode: claude.ai artifact database, one document.          *
+   *   Local mode: this browser only (when opened outside claude.ai).   *
+   * ------------------------------------------------------------------ */
+  var LS_STATE = "careward:practice-state:v1";
+  var LS_SESSION = "careward:session:v1";
+  var DOC_PATH = "careward/practice";
+
+  function emptyState() { return { schema: 1, facilityId: FACILITY.id, caseRec: null, task: null, events: [] }; }
+  function normalize(d) {
+    var s = emptyState();
+    if (d && typeof d === "object") {
+      s.caseRec = d.caseRec || null;
+      s.task = d.task || null;
+      s.events = Array.isArray(d.events) ? d.events : [];
+    }
+    return s;
+  }
+
+  var state = emptyState();
+  var stateJson = JSON.stringify(state);
+  var mode = "starting";       // starting | local | shared-loading | shared | shared-slow | shared-error
+  var docRef = null;
+  var canWrite = true;
+  var writing = Promise.resolve();
+  var saveError = "";
+
+  function setState(next, why) {
+    state = next; stateJson = JSON.stringify(next);
+    render();
+    return persist();
+  }
+  function persist() {
+    if (mode === "local") { lsSet(LS_STATE, stateJson); return Promise.resolve(); }
+    if (!docRef) return Promise.resolve();
+    var body = JSON.parse(stateJson);
+    writing = writing.then(function () {
+      return docRef.set(body).then(function () { saveError = ""; renderStatus(); }, function (e) {
+        saveError = (e && e.code === "invalid_argument" && !canWrite) ?
+          "Your claude.ai access to this page is view-only, so changes are not saved. Ask the owner to share it with you as a Contributor." :
+          "Last change could not be saved (" + (e && e.code || "error") + "). Check your connection and try again.";
+        renderStatus(); render();
+      });
+    });
+    return writing;
+  }
+
+  function useLocal() {
+    mode = "local";
+    var raw = lsGet(LS_STATE);
+    if (raw) { try { state = normalize(JSON.parse(raw)); } catch (e) { state = emptyState(); } }
+    stateJson = JSON.stringify(state);
+    window.addEventListener("storage", function (ev) {
+      if (ev.key === LS_STATE) { try { state = normalize(JSON.parse(ev.newValue || "null")); stateJson = JSON.stringify(state); render(); } catch (e) {} }
+    });
+    render();
+  }
+
+  function initStore() {
+    if (!window.claude || typeof window.claude.use !== "function") { useLocal(); return; }
+    mode = "shared-loading"; render();
+    window.claude.use("db").then(function (db) {
+      if (!db) { useLocal(); return; }
+      window.claude.use("user").then(function (u) {
+        if (u && typeof u.can === "function") {
+          Promise.resolve(u.can("data.write")).then(function (c) { if (c === false) { canWrite = false; render(); } }, function () {});
+        }
+      }, function () {});
+      docRef = db.doc(DOC_PATH);
+      var slow = setTimeout(function () { if (mode === "shared-loading") { mode = "shared-slow"; render(); } }, 10000);
+      docRef.onSnapshot(function (snap) {
+        if (!snap.metadata || !snap.metadata.fromCache) clearTimeout(slow);
+        var next = snap.exists ? normalize(snap.data()) : emptyState();
+        var nextJson = JSON.stringify(next);
+        var first = mode !== "shared";
+        mode = "shared";
+        if (nextJson !== stateJson || first) {
+          var before = state;
+          state = clone(next); stateJson = nextJson;
+          render();
+          if (!first && before.task && state.task && before.task.status !== state.task.status) flash();
+        }
+      }, function (e) {
+        clearTimeout(slow);
+        mode = "shared-error"; render();
+      });
+    }, function () { useLocal(); });
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Session (simulated sign-in, remembered on this device only)        *
+   * ------------------------------------------------------------------ */
+  var session = null;
+  try { session = JSON.parse(lsGet(LS_SESSION) || "null"); } catch (e) { session = null; }
+  if (session && !acct(session.id)) session = null;
+  var signinPick = null, signinError = "";
+
+  function me() { return session ? acct(session.id) : null; }
+  function route() {
+    var h = (location.hash || "").replace("#", "");
+    return h === "admin" || h === "staff" ? h : "";
+  }
+
+  /* UI-only memory: form drafts and transient messages */
+  var drafts = {};
+  var ui = { confirmReset: false, showReturn: false, staffOpen: true, msg: "" };
+
+  function draft(key, fallback) { return Object.prototype.hasOwnProperty.call(drafts, key) ? drafts[key] : fallback; }
+
+  /* ------------------------------------------------------------------ *
+   * Actions                                                            *
+   * ------------------------------------------------------------------ */
+  function stamp(m) { return { by: m.id, byName: m.name, byRole: m.title, at: new Date().toISOString() }; }
+  function addEvent(s, type, label, m, detail) {
+    var e = stamp(m); e.type = type; e.label = label; if (detail) e.detail = detail;
+    s.events.push(e);
+  }
+
+  function saveCitation() {
+    var m = me(); if (!m || m.role !== "don") return;
+    var f = {
+      tag: (draft("c_tag", "") || "").trim(),
+      title: (draft("c_title", "") || "").trim(),
+      surveyDate: draft("c_date", ""),
+      scope: draft("c_scope", ""),
+      statement: (draft("c_statement", "") || "").trim(),
+      residents: (draft("c_residents", "") || "").trim()
+    };
+    if (!f.tag || !f.title || !f.surveyDate || !f.statement) { ui.msg = "Fill in the F-tag, title, survey date and deficiency statement."; render(); return; }
+    var s = clone(state);
+    var c = stamp(m);
+    s.caseRec = { id: uid("case"), tag: f.tag, title: f.title, surveyDate: f.surveyDate, scope: f.scope, statement: f.statement, residents: f.residents, practice: true, enteredBy: c.by, enteredByName: c.byName, enteredAt: c.at };
+    addEvent(s, "citation", "Entered practice citation " + f.tag, m);
+    ["c_tag", "c_title", "c_date", "c_scope", "c_statement", "c_residents"].forEach(function (k) { delete drafts[k]; });
+    ui.msg = "";
+    setState(s);
+  }
+
+  function assignTask() {
+    var m = me(); if (!m || m.role !== "don" || !state.caseRec) return;
+    var f = {
+      title: (draft("a_title", "") || "").trim(),
+      assignee: draft("a_assignee", ""),
+      due: draft("a_due", offsetDate(2)),
+      instructions: (draft("a_instructions", "") || "").trim(),
+      proof: (draft("a_proof", "") || "").trim(),
+      checklist: (draft("a_checklist", "") || "").split("\n").map(function (x) { return x.trim(); }).filter(Boolean)
+    };
+    if (!f.title || !f.assignee || !f.due || !f.instructions || !f.proof || !f.checklist.length) {
+      ui.msg = "Fill in every field: the action, the employee, the due date, instructions, proof needed, and at least one checklist item."; render(); return;
+    }
+    var who = acct(f.assignee);
+    var s = clone(state);
+    var c = stamp(m);
+    s.task = {
+      id: uid("task"), caseId: s.caseRec.id, title: f.title, assigneeId: who.id, assigneeName: who.name,
+      dueDate: f.due, instructions: f.instructions, proof: f.proof,
+      checklist: f.checklist.map(function (t, i) { return { id: "i" + (i + 1), text: t }; }),
+      status: "assigned", assigned: c, read: null, submitted: null, verified: null, returned: null, round: 1
+    };
+    addEvent(s, "assigned", "Assigned corrective action to " + who.name + ", due " + fmtDate(f.due), m);
+    ["a_title", "a_assignee", "a_due", "a_instructions", "a_proof", "a_checklist"].forEach(function (k) { delete drafts[k]; });
+    ui.msg = "";
+    setState(s);
+  }
+
+  function acknowledge() {
+    var m = me(); var t = state.task; if (!m || !t || t.assigneeId !== m.id || t.read) return;
+    var s = clone(state);
+    s.task.read = stamp(m);
+    s.task.status = "acknowledged";
+    addEvent(s, "read", "I read the update", m);
+    setState(s);
+  }
+
+  function submitWork() {
+    var m = me(); var t = state.task; if (!m || !t || t.assigneeId !== m.id || !t.read) return;
+    var checked = t.checklist.filter(function (it) { return !!drafts["chk_" + t.id + "_" + it.id]; }).map(function (it) { return it.id; });
+    var proof = (draft("s_proof_" + t.id, "") || "").trim();
+    if (checked.length !== t.checklist.length) { ui.msg = "Check every item on the list before you submit."; render(); return; }
+    if (!proof) { ui.msg = "Describe your proof before you submit."; render(); return; }
+    var s = clone(state);
+    var c = stamp(m); c.checked = checked; c.proof = proof; c.round = t.round || 1;
+    s.task.submitted = c;
+    s.task.status = "submitted";
+    addEvent(s, "submitted", "I submitted the work", m, "Checklist " + checked.length + "/" + t.checklist.length + " complete. Proof: " + proof);
+    t.checklist.forEach(function (it) { delete drafts["chk_" + t.id + "_" + it.id]; });
+    delete drafts["s_proof_" + t.id];
+    ui.msg = "";
+    setState(s);
+  }
+
+  function verify() {
+    var m = me(); var t = state.task; if (!m || m.role !== "don" || !t || t.status !== "submitted") return;
+    var s = clone(state);
+    var c = stamp(m); c.note = (draft("v_note", "") || "").trim();
+    s.task.verified = c;
+    s.task.status = "verified";
+    addEvent(s, "verified", "I verified the result", m, c.note || "");
+    delete drafts.v_note;
+    setState(s);
+  }
+
+  function sendBack() {
+    var m = me(); var t = state.task; if (!m || m.role !== "don" || !t || t.status !== "submitted") return;
+    var note = (draft("v_note", "") || "").trim();
+    if (!note) { ui.msg = "Write what needs to be fixed before you send it back."; render(); return; }
+    var s = clone(state);
+    var c = stamp(m); c.note = note;
+    s.task.returned = c;
+    s.task.previousSubmission = s.task.submitted;
+    s.task.submitted = null;
+    s.task.status = "returned";
+    s.task.round = (s.task.round || 1) + 1;
+    addEvent(s, "returned", "Sent back for more work", m, note);
+    delete drafts.v_note; ui.showReturn = false; ui.msg = "";
+    setState(s);
+  }
+
+  function resetPractice() {
+    var m = me(); if (!m || m.role !== "don") return;
+    drafts = {}; ui = { confirmReset: false, showReturn: false, staffOpen: true, msg: "" };
+    setState(emptyState());
+  }
+
+  function fillCitationExample() {
+    drafts.c_tag = PRACTICE_CITATION.tag; drafts.c_title = PRACTICE_CITATION.title; drafts.c_date = PRACTICE_CITATION.surveyDate;
+    drafts.c_scope = PRACTICE_CITATION.scope; drafts.c_statement = PRACTICE_CITATION.statement; drafts.c_residents = PRACTICE_CITATION.residents;
+    ui.msg = ""; render();
+  }
+  function fillActionExample() {
+    drafts.a_title = PRACTICE_ACTION.title; drafts.a_instructions = PRACTICE_ACTION.instructions;
+    drafts.a_proof = PRACTICE_ACTION.proof; drafts.a_checklist = PRACTICE_ACTION.checklist;
+    if (!drafts.a_assignee) drafts.a_assignee = "cna-marcus";
+    if (!drafts.a_due) drafts.a_due = offsetDate(2);
+    ui.msg = ""; render();
+  }
+
+  function signIn() {
+    var a = acct(signinPick);
+    var pin = (drafts.pin || "").trim();
+    if (!a) { signinError = "Choose your name first."; render(); return; }
+    if (pin !== a.pin) { signinError = "That PIN doesn't match " + a.first + "'s demo PIN."; render(); return; }
+    session = { id: a.id }; lsSet(LS_SESSION, JSON.stringify(session));
+    signinPick = null; signinError = ""; delete drafts.pin; ui.msg = "";
+    var want = a.role === "don" ? "admin" : "staff";
+    if (route() !== want) location.hash = want; else render();
+  }
+  function signOut() { session = null; lsDel(LS_SESSION); drafts = {}; ui.msg = ""; render(); }
+
+  /* ------------------------------------------------------------------ *
+   * Derived values                                                     *
+   * ------------------------------------------------------------------ */
+  function isOverdue(t) { return t && t.status !== "verified" && t.status !== "submitted" && t.dueDate < todayYmd(); }
+  var STATUS_TEXT = { assigned: "Assigned, not yet read", acknowledged: "Read, work in progress", submitted: "Submitted, waiting for DON review", verified: "Verified", returned: "Sent back for more work" };
+  function statusChip(t) {
+    var h = '<span class="chip ' + esc(t.status) + '">' + esc(STATUS_TEXT[t.status] || t.status) + "</span>";
+    if (isOverdue(t)) h += ' <span class="chip overdue">Overdue</span>';
+    return h;
+  }
+
+  function stampsHtml(t) {
+    function one(cls, title, rec, waiting) {
+      return '<div class="stamp ' + cls + (rec ? " done" : "") + '"><div class="stamp-title">' + esc(title) + "</div>" +
+        (rec ? '<div class="stamp-meta">' + esc(rec.byName) + " · " + esc(rec.byRole) + '</div><div class="stamp-meta mono">' + esc(fmtStamp(rec.at)) + "</div>"
+             : '<div class="stamp-meta">' + esc(waiting) + "</div>") + "</div>";
+    }
+    return '<div class="stamps">' +
+      one("read", "I read the update", t ? t.read : null, t ? "Waiting for " + t.assigneeName : "Not assigned yet") +
+      one("submit", "I submitted the work", t ? t.submitted : null, t && t.status === "returned" ? "Sent back. Waiting for resubmission" : "Not submitted yet") +
+      one("verify", "I verified the result", t ? t.verified : null, "Waiting for DON review") +
+      "</div>";
+  }
+
+  function citationCard(c, compact) {
+    return '<div class="cite"><div class="cite-head">' +
+      '<div><span class="label">Tag</span><span class="tag-big">' + esc(c.tag) + "</span></div>" +
+      '<div style="min-width:0"><span class="label">Regulation</span><strong>' + esc(c.title) + "</strong></div>" +
+      '<div><span class="label">Survey date</span><span class="mono">' + esc(c.surveyDate) + "</span></div>" +
+      (c.scope ? '<div><span class="label">Scope/severity</span><span class="mono">' + esc(c.scope) + "</span></div>" : "") +
+      '</div><div class="cite-body">' +
+      (compact ? "" : '<span class="label">Statement of deficiency (practice)</span>') +
+      "<p>" + nl2br(c.statement) + "</p>" +
+      (c.residents && !compact ? '<p class="small muted">Residents named: ' + esc(c.residents) + "</p>" : "") +
+      (compact ? "" : '<p class="small muted">Entered by ' + esc(c.enteredByName) + " · <span class=\"mono\">" + esc(fmtStamp(c.enteredAt)) + "</span></p>") +
+      "</div></div>";
+  }
+
+  function checklistReview(t, sub) {
+    var ids = sub ? sub.checked : [];
+    return '<ul class="checklist">' + t.checklist.map(function (it) {
+      var on = ids.indexOf(it.id) >= 0;
+      return '<li class="check"><span class="mark' + (on ? " on" : "") + '" aria-label="' + (on ? "Done" : "Not done") + '">' + (on ? "✓" : "") + "</span><span>" + esc(it.text) + "</span></li>";
+    }).join("") + "</ul>";
+  }
+
+  function logHtml() {
+    if (!state.events.length) return '<p class="muted small">No activity yet.</p>';
+    return '<ul class="log">' + state.events.slice().reverse().map(function (e) {
+      return '<li><span class="mono muted">' + esc(fmtStamp(e.at)) + "</span><span><strong>" + esc(e.label) + "</strong> — " + esc(e.byName) + ' <span class="muted">(' + esc(e.byRole) + ")</span>" +
+        (e.detail ? '<br><span class="muted">' + esc(e.detail) + "</span>" : "") + "</span></li>";
+    }).join("") + "</ul>";
+  }
+
+  function recordText() {
+    var c = state.caseRec, t = state.task, L = [];
+    L.push("CAREWARD PRACTICE RECORD — FICTIONAL DATA, NOT A REAL SURVEY");
+    L.push("Facility: " + FACILITY.name + ", " + FACILITY.city + " (fictional)");
+    L.push("Exported: " + fmtStamp(new Date().toISOString()) + " by " + (me() ? me().name : ""));
+    L.push("");
+    if (c) {
+      L.push("CITATION " + c.tag + " — " + c.title);
+      L.push("Survey date: " + c.surveyDate + (c.scope ? "   Scope/severity: " + c.scope : ""));
+      L.push("Statement: " + c.statement);
+      L.push("Entered by " + c.enteredByName + " at " + fmtStamp(c.enteredAt));
+      L.push("");
+    }
+    if (t) {
+      L.push("CORRECTIVE ACTION: " + t.title);
+      L.push("Assigned to: " + t.assigneeName + "   Due: " + t.dueDate + "   Status: " + (STATUS_TEXT[t.status] || t.status));
+      L.push("Proof required: " + t.proof);
+      L.push("Checklist:");
+      t.checklist.forEach(function (it) {
+        var on = t.submitted && t.submitted.checked.indexOf(it.id) >= 0;
+        L.push("  [" + (on ? "x" : " ") + "] " + it.text);
+      });
+      if (t.submitted) L.push("Proof given: " + t.submitted.proof);
+      L.push("");
+      L.push("I read the update:      " + (t.read ? t.read.byName + " — " + fmtStamp(t.read.at) : "not yet"));
+      L.push("I submitted the work:   " + (t.submitted ? t.submitted.byName + " — " + fmtStamp(t.submitted.at) : "not yet"));
+      L.push("I verified the result:  " + (t.verified ? t.verified.byName + " — " + fmtStamp(t.verified.at) : "not yet"));
+      if (t.verified && t.verified.note) L.push("Review note: " + t.verified.note);
+      L.push("");
+    }
+    L.push("ACTIVITY LOG");
+    state.events.forEach(function (e) { L.push(fmtStamp(e.at) + " | " + e.byName + " | " + e.label + (e.detail ? " | " + e.detail : "")); });
+    return L.join("\n");
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Views                                                              *
+   * ------------------------------------------------------------------ */
+  function renderStatus() {
+    var el = document.getElementById("store-status");
+    var t = "";
+    if (mode === "local") t = "Saving on this device only";
+    else if (mode === "shared") t = "Saving to the shared practice record · updates live";
+    else if (mode === "shared-slow") t = "Can't reach the shared record yet. What you see may be out of date.";
+    else if (mode === "shared-error") t = "Lost connection to the shared record. Reload the page.";
+    else t = "Connecting…";
+    if (saveError) t = saveError;
+    el.textContent = t;
+  }
+
+  function renderTopbar() {
+    var m = me(); var r = route();
+    var bar = document.getElementById("topbar");
+    var h = '<div class="brand"><svg class="brand-mark" viewBox="0 0 28 28" aria-hidden="true"><rect width="28" height="28" rx="7" fill="var(--accent)"/><path d="M8 14.5l4 4 8-9" fill="none" stroke="var(--accent-ink)" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>Careward</div>';
+    if (m) h += '<span class="view-tag">' + (m.role === "don" ? "Admin" : "Staff") + "</span>";
+    h += '<span class="small muted">' + esc(FACILITY.name) + " · " + esc(FACILITY.city) + "</span>";
+    if (m) h += '<div class="who"><span>Signed in as <strong>' + esc(m.name) + '</strong></span><button class="btn ghost" data-act="signout" id="btn-signout">Sign out</button></div>';
+    bar.innerHTML = h;
+  }
+
+  function viewSignin() {
+    var r = route();
+    var list = r === "admin" ? ACCOUNTS.filter(function (a) { return a.role === "don"; }) : r === "staff" ? STAFF : ACCOUNTS;
+    var heading = r === "admin" ? "Careward Admin" : r === "staff" ? "Careward Staff" : "Sign in to Careward";
+    var sub = r === "admin" ? "For the director of nursing." : r === "staff" ? "Open your own assignments." : "Pick your demo account.";
+    var pick = acct(signinPick);
+    var h = '<section class="signin">';
+    h += '<div style="display:grid;gap:6px"><h1>' + esc(heading) + '</h1><p class="muted">' + esc(sub) + " These are demo accounts. Each card shows its practice PIN.</p></div>";
+    h += '<div class="accounts">' + list.map(function (a) {
+      return '<button class="account' + (signinPick === a.id ? " selected" : "") + '" data-act="pick" data-id="' + a.id + '" id="acct-' + a.id + '">' +
+        '<span class="name">' + esc(a.name) + '</span><span class="small muted">' + esc(a.title) + " · " + esc(a.shift) + '</span><span class="pin">Demo PIN ' + esc(a.pin) + "</span></button>";
+    }).join("") + "</div>";
+    if (pick) {
+      h += '<form class="panel" id="signin-form" style="max-width:420px">' +
+        '<div class="field"><label for="pin">PIN for ' + esc(pick.first) + '</label><input type="password" inputmode="numeric" autocomplete="off" id="pin" data-draft="pin" value="' + esc(drafts.pin || "") + '"><span class="hint">Demo PIN ' + esc(pick.pin) + "</span></div>" +
+        (signinError ? '<p class="error">' + esc(signinError) + "</p>" : "") +
+        '<button class="btn block" type="submit" id="btn-signin">Sign in</button></form>';
+    }
+    if (r) h += '<p class="small muted">' + (r === "admin" ? 'Staff member? <a href="#staff">Open Careward Staff</a>.' : 'Director of nursing? <a href="#admin">Open Careward Admin</a>.') + "</p>";
+    h += "</section>";
+    return h;
+  }
+
+  function viewWrongRoom(m) {
+    var want = m.role === "don" ? "admin" : "staff";
+    return '<section class="phone panel"><h2>This view is for ' + (route() === "admin" ? "the director of nursing" : "staff") + '</h2><p>You are signed in as ' + esc(m.name) + '.</p><div class="actions"><a class="btn" href="#' + want + '">Go to Careward ' + (want === "admin" ? "Admin" : "Staff") + '</a><button class="btn secondary" data-act="signout" id="btn-signout-2">Sign in as someone else</button></div></section>';
+  }
+
+  function msgHtml() { return ui.msg ? '<p class="error" role="alert">' + esc(ui.msg) + "</p>" : ""; }
+
+  /* ----- Admin ----- */
+  function viewAdmin() {
+    var c = state.caseRec, t = state.task;
+    var h = "";
+    if (!canWrite) h += '<div class="notice bad">Your claude.ai access to this page is view-only. Ask the owner to share it with you as a Contributor so your changes save.</div>';
+
+    // Step header
+    var step = !c ? 1 : !t ? 2 : 3;
+    h += '<div class="panel-head"><div style="display:grid;gap:4px"><h1>' + (step === 1 ? "Enter a practice citation" : step === 2 ? "Assign a corrective action" : "Corrective action dashboard") + '</h1><p class="muted">' +
+      (step === 1 ? "Step 1 of 3. Type the citation as it appears on the practice statement of deficiencies." :
+       step === 2 ? "Step 2 of 3. Choose one employee, a due date, and the proof you need." :
+       "Step 3 of 3. Track the employee's response, review the checklist, and verify.") + "</p></div>" +
+      '<span class="step-num">STEP ' + step + " / 3</span></div>";
+
+    if (step === 1) {
+      h += '<form class="panel" id="citation-form">' +
+        '<div class="panel-head"><h2>Citation</h2><button type="button" class="btn secondary" data-act="fill-citation" id="btn-fill-citation">Fill with practice F880 example</button></div>' +
+        '<div class="row">' +
+          field("c_tag", "F-tag", "text", draft("c_tag", ""), "Example: F880") +
+          field("c_title", "Regulation title", "text", draft("c_title", ""), "Example: Infection Prevention & Control") +
+        "</div><div class=\"row\">" +
+          field("c_date", "Survey date", "date", draft("c_date", ""), "") +
+          selectField("c_scope", "Scope / severity", draft("c_scope", ""), [["", "Choose (optional)"]].concat("ABCDEFGHIJKL".split("").map(function (x) { return [x, x]; })), "Letter from the CMS grid") +
+        "</div>" +
+        areaField("c_statement", "Deficiency statement", draft("c_statement", ""), "What the surveyor found. Use fictional details only.") +
+        field("c_residents", "Residents named", "text", draft("c_residents", ""), "Use resident codes like R3, never real names") +
+        msgHtml() +
+        '<div class="actions"><button class="btn" type="submit" id="btn-save-citation">Save citation</button></div></form>';
+      return h;
+    }
+
+    if (step === 2) {
+      var opts = [["", "Choose an employee"]].concat(STAFF.map(function (a) { return [a.id, a.name + " — " + a.shift]; }));
+      h += '<div class="grid-2"><form class="panel" id="assign-form">' +
+        '<div class="panel-head"><h2>Corrective action</h2><button type="button" class="btn secondary" data-act="fill-action" id="btn-fill-action">Fill with practice example</button></div>' +
+        field("a_title", "What needs to be done", "text", draft("a_title", ""), "A short name the employee will recognize") +
+        '<div class="row">' + selectField("a_assignee", "Assign to", draft("a_assignee", ""), opts, "Only this person will see it") +
+          field("a_due", "Due date", "date", draft("a_due", offsetDate(2)), "") + "</div>" +
+        areaField("a_instructions", "Instructions for the employee", draft("a_instructions", ""), "Plain language. This is what they read on their phone.") +
+        areaField("a_proof", "Proof needed", draft("a_proof", ""), "What you need to see before you verify") +
+        areaField("a_checklist", "Checklist items (one per line)", draft("a_checklist", ""), "The employee checks each item before submitting") +
+        msgHtml() +
+        '<div class="actions"><button class="btn" type="submit" id="btn-assign">Assign</button></div></form>' +
+        '<div class="panel"><h2>Citation on file</h2>' + citationCard(c) + "</div></div>";
+      return h;
+    }
+
+    // Step 3: dashboard
+    var who = acct(t.assigneeId);
+    h += '<div class="grid-2">';
+    // Left: progress + review
+    h += '<div style="display:grid;gap:20px;min-width:0">';
+    h += '<section class="panel" id="progress-panel"><div class="panel-head"><h2>' + esc(t.title) + "</h2>" + statusChip(t) + "</div>" +
+      '<dl class="kv"><dt>Assigned to</dt><dd><strong>' + esc(t.assigneeName) + "</strong>" + (who ? ' <span class="muted">· ' + esc(who.shift) + "</span>" : "") + "</dd>" +
+      "<dt>Due</dt><dd>" + esc(fmtDate(t.dueDate)) + (isOverdue(t) ? ' <span class="chip overdue">Overdue</span>' : "") + "</dd>" +
+      '<dt>Assigned</dt><dd>' + esc(t.assigned.byName) + ' · <span class="mono">' + esc(fmtStamp(t.assigned.at)) + "</span></dd>" +
+      "<dt>Proof needed</dt><dd>" + nl2br(t.proof) + "</dd></dl>" +
+      stampsHtml(t) + "</section>";
+
+    // Review panel
+    h += '<section class="panel"><h2>Employee response</h2>';
+    if (t.status === "submitted" || t.status === "verified") {
+      var sub = t.submitted;
+      h += '<p class="small muted">Submitted by ' + esc(sub.byName) + ' · <span class="mono">' + esc(fmtStamp(sub.at)) + "</span>" + (sub.round > 1 ? " · resubmission " + (sub.round - 1) : "") + "</p>" +
+        checklistReview(t, sub) +
+        '<div class="field"><span class="label">Proof the employee gave</span><p>' + nl2br(sub.proof) + "</p></div>";
+      if (t.status === "submitted") {
+        h += areaField("v_note", "Review note (optional to verify, required to send back)", draft("v_note", ""), "Example: Confirmed with charge nurse Lopez. Log on 100 Hall matches.") +
+          msgHtml() +
+          '<div class="actions"><button class="btn verify" data-act="verify" id="btn-verify"' + (canWrite ? "" : " disabled") + '>I verified the result</button>' +
+          '<button class="btn secondary" data-act="sendback" id="btn-sendback">Send back for more work</button></div>';
+      } else {
+        h += '<div class="notice good"><strong>Verified</strong> by ' + esc(t.verified.byName) + ' · <span class="mono">' + esc(fmtStamp(t.verified.at)) + "</span>" + (t.verified.note ? "<br>" + nl2br(t.verified.note) : "") + "</div>";
+      }
+    } else if (t.status === "returned") {
+      h += '<div class="notice warn"><strong>Sent back</strong> ' + esc(fmtStamp(t.returned.at)) + ": " + nl2br(t.returned.note) + "</div>" +
+        '<p class="muted">Waiting for ' + esc(t.assigneeName) + " to resubmit. The checklist will appear here when they do.</p>";
+    } else {
+      h += '<p class="muted">' + (t.read ? esc(t.assigneeName) + " has read the update. The checklist will appear here when they submit." : esc(t.assigneeName) + " has not opened the assignment yet.") + "</p>" + checklistReview(t, null);
+    }
+    h += "</section></div>";
+
+    // Right: citation, log, export, reset
+    h += '<div style="display:grid;gap:20px;min-width:0">' +
+      '<section class="panel"><h2>Citation</h2>' + citationCard(c) + "</section>" +
+      '<section class="panel"><h2>Activity log</h2>' + logHtml() + "</section>" +
+      '<section class="panel"><div class="panel-head"><h2>Export record</h2><button class="btn secondary" data-act="copy" id="btn-copy">Copy record</button></div>' +
+        '<textarea class="record" id="record" readonly>' + esc(recordText()) + "</textarea>" +
+        '<p class="small" id="copy-msg" aria-live="polite"></p></section>' +
+      '<section class="panel"><h2>Start over</h2><p class="small muted">Clears this practice citation, the assignment and the activity log for everyone using this link.</p>' +
+        (ui.confirmReset ? '<div class="notice bad">Delete the practice case and its history? This cannot be undone.</div><div class="actions"><button class="btn danger" data-act="reset-yes" id="btn-reset-yes">Yes, delete and start over</button><button class="btn secondary" data-act="reset-no" id="btn-reset-no">Keep it</button></div>'
+                         : '<div class="actions"><button class="btn secondary" data-act="reset" id="btn-reset">Start a new practice case</button></div>') +
+      "</section></div>";
+    h += "</div>";
+    return h;
+  }
+
+  function field(id, label, type, value, hint) {
+    return '<div class="field"><label for="' + id + '">' + esc(label) + '</label><input type="' + type + '" id="' + id + '" data-draft="' + id + '" value="' + esc(value) + '">' + (hint ? '<span class="hint">' + esc(hint) + "</span>" : "") + "</div>";
+  }
+  function areaField(id, label, value, hint) {
+    return '<div class="field"><label for="' + id + '">' + esc(label) + '</label><textarea id="' + id + '" data-draft="' + id + '">' + esc(value) + "</textarea>" + (hint ? '<span class="hint">' + esc(hint) + "</span>" : "") + "</div>";
+  }
+  function selectField(id, label, value, options, hint) {
+    return '<div class="field"><label for="' + id + '">' + esc(label) + '</label><select id="' + id + '" data-draft="' + id + '">' +
+      options.map(function (o) { return '<option value="' + esc(o[0]) + '"' + (o[0] === value ? " selected" : "") + ">" + esc(o[1]) + "</option>"; }).join("") +
+      "</select>" + (hint ? '<span class="hint">' + esc(hint) + "</span>" : "") + "</div>";
+  }
+
+  /* ----- Staff ----- */
+  function viewStaff(m) {
+    var t = state.task && state.task.assigneeId === m.id ? state.task : null;
+    var h = '<section class="phone">';
+    h += '<div style="display:grid;gap:4px"><h1>My assignments</h1><p class="muted">' + esc(m.name) + " · " + esc(m.shift) + "</p></div>";
+    if (!canWrite) h += '<div class="notice bad">Your claude.ai access to this page is view-only. Ask the owner to share it with you as a Contributor so your changes save.</div>';
+    if (!t) {
+      h += '<div class="panel"><h2>Nothing assigned to you</h2><p class="muted">When the director of nursing assigns you a corrective action, it will show up here. You only see your own assignments.</p></div></section>';
+      return h;
+    }
+    h += '<div class="panel" id="task-panel">' +
+      '<div class="panel-head"><span class="label">Corrective action</span>' + statusChip(t) + "</div>" +
+      "<h2>" + esc(t.title) + "</h2>" +
+      '<dl class="kv"><dt>Due</dt><dd><strong>' + esc(fmtDate(t.dueDate)) + "</strong></dd><dt>From</dt><dd>" + esc(t.assigned.byName) + "</dd><dt>Why</dt><dd>Practice citation " + esc(state.caseRec ? state.caseRec.tag + " · " + state.caseRec.title : "") + "</dd></dl></div>";
+
+    // Step 1: read
+    h += '<div class="panel"><span class="step-num">STEP 1 · READ</span><h2>Instructions</h2><p>' + nl2br(t.instructions) + "</p>" +
+      '<div class="field"><span class="label">Proof the DON needs</span><p>' + nl2br(t.proof) + "</p></div>";
+    if (state.caseRec) h += '<details><summary class="small">Show the citation</summary><div style="margin-top:10px">' + citationCard(state.caseRec, true) + "</div></details>";
+    if (t.read) {
+      h += '<div class="notice" style="background:var(--read-soft)"><strong style="color:var(--read)">I read the update</strong><br><span class="small">' + esc(t.read.byName) + ' · <span class="mono">' + esc(fmtStamp(t.read.at)) + "</span></span></div>";
+    } else {
+      h += '<button class="btn read block" data-act="ack" id="btn-ack"' + (canWrite ? "" : " disabled") + ">I read the update</button>";
+    }
+    h += "</div>";
+
+    // Step 2: checklist
+    h += '<div class="panel"><span class="step-num">STEP 2 · DO THE WORK</span><h2>Checklist</h2>';
+    if (t.status === "returned") h += '<div class="notice warn"><strong>Sent back by ' + esc(t.returned.byName) + ":</strong> " + nl2br(t.returned.note) + "</div>";
+    if (!t.read) {
+      h += '<p class="muted">Tap “I read the update” first. Then the checklist opens.</p>' + checklistReview(t, null);
+    } else if (t.submitted) {
+      h += checklistReview(t, t.submitted) + '<div class="field"><span class="label">Your proof</span><p>' + nl2br(t.submitted.proof) + "</p></div>" +
+        '<div class="notice" style="background:var(--submit-soft)"><strong style="color:var(--submit)">I submitted the work</strong><br><span class="small">' + esc(t.submitted.byName) + ' · <span class="mono">' + esc(fmtStamp(t.submitted.at)) + "</span></span></div>";
+    } else {
+      h += '<ul class="checklist">' + t.checklist.map(function (it) {
+        var k = "chk_" + t.id + "_" + it.id;
+        return '<li><label class="check" for="' + k + '"><input type="checkbox" id="' + k + '" data-draft="' + k + '"' + (drafts[k] ? " checked" : "") + "><span>" + esc(it.text) + "</span></label></li>";
+      }).join("") + "</ul>" +
+        areaField("s_proof_" + t.id, "Your proof", draft("s_proof_" + t.id, ""), "Example: Charge nurse J. Lopez watched my return demo at 0230. Refilled dispensers at 104 and 112.") +
+        msgHtml() +
+        '<button class="btn submit block" data-act="submit" id="btn-submit"' + (canWrite ? "" : " disabled") + ">I submitted the work</button>";
+    }
+    h += "</div>";
+
+    // Step 3: verification
+    h += '<div class="panel"><span class="step-num">STEP 3 · DON REVIEW</span>';
+    if (t.verified) h += '<div class="notice good"><strong style="color:var(--verify)">Verified by ' + esc(t.verified.byName) + '</strong><br><span class="small mono">' + esc(fmtStamp(t.verified.at)) + "</span>" + (t.verified.note ? '<br><span class="small">' + nl2br(t.verified.note) + "</span>" : "") + "</div><p>You're done. Thank you.</p>";
+    else if (t.submitted) h += '<p class="muted">Sent to ' + esc(t.assigned.byName) + ". You'll see a green Verified note here when the DON reviews it.</p>";
+    else h += '<p class="muted">After you submit, the DON reviews your checklist and marks it verified.</p>';
+    h += "</div></section>";
+    return h;
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Render                                                             *
+   * ------------------------------------------------------------------ */
+  function render() {
+    var active = document.activeElement;
+    var focusId = active && active.id ? active.id : null;
+    var selStart = null, selEnd = null;
+    try { if (active && "selectionStart" in active) { selStart = active.selectionStart; selEnd = active.selectionEnd; } } catch (e) {}
+
+    renderTopbar(); renderStatus();
+    var app = document.getElementById("app");
+    var m = me(); var r = route();
+    var html;
+    if (mode === "starting" || mode === "shared-loading") html = '<div class="loading">Opening the practice record…</div>';
+    else if (mode === "shared-error") html = '<div class="notice bad">Careward lost its connection to the shared practice record. Reload the page to try again.</div>';
+    else if (!m) html = viewSignin();
+    else if ((r === "admin" && m.role !== "don") || (r === "staff" && m.role !== "staff")) html = viewWrongRoom(m);
+    else if (m.role === "don") html = viewAdmin();
+    else html = viewStaff(m);
+    app.innerHTML = html;
+
+    if (focusId) {
+      var el = document.getElementById(focusId);
+      if (el) { try { el.focus({ preventScroll: true }); if (selStart != null && "setSelectionRange" in el) el.setSelectionRange(selStart, selEnd); } catch (e) {} }
+    }
+  }
+
+  function flash() {
+    var el = document.getElementById("progress-panel") || document.getElementById("task-panel");
+    if (!el) return; el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash");
+  }
+
+  /* ------------------------------------------------------------------ *
+   * Events (delegated)                                                 *
+   * ------------------------------------------------------------------ */
+  document.addEventListener("input", function (e) {
+    var k = e.target && e.target.getAttribute && e.target.getAttribute("data-draft");
+    if (!k) return;
+    drafts[k] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+  });
+  document.addEventListener("change", function (e) {
+    var k = e.target && e.target.getAttribute && e.target.getAttribute("data-draft");
+    if (!k) return;
+    drafts[k] = e.target.type === "checkbox" ? e.target.checked : e.target.value;
+    if (ui.msg && e.target.type === "checkbox") { ui.msg = ""; }
+  });
+  document.addEventListener("submit", function (e) {
+    e.preventDefault();
+    var id = e.target.id;
+    if (id === "signin-form") signIn();
+    else if (id === "citation-form") saveCitation();
+    else if (id === "assign-form") assignTask();
+  });
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest ? e.target.closest("[data-act]") : null;
+    if (!b) return;
+    var a = b.getAttribute("data-act");
+    if (a === "pick") { signinPick = b.getAttribute("data-id"); signinError = ""; delete drafts.pin; render(); var p = document.getElementById("pin"); if (p) p.focus(); }
+    else if (a === "signout") signOut();
+    else if (a === "fill-citation") fillCitationExample();
+    else if (a === "fill-action") fillActionExample();
+    else if (a === "ack") acknowledge();
+    else if (a === "submit") submitWork();
+    else if (a === "verify") verify();
+    else if (a === "sendback") sendBack();
+    else if (a === "reset") { ui.confirmReset = true; render(); }
+    else if (a === "reset-no") { ui.confirmReset = false; render(); }
+    else if (a === "reset-yes") resetPractice();
+    else if (a === "copy") {
+      var text = recordText();
+      var ta = document.getElementById("record");
+      var done = function (msg) { var el = document.getElementById("copy-msg"); if (el) el.textContent = msg; };
+      try {
+        navigator.clipboard.writeText(text).then(function () { done("Copied. Paste it into an email or document."); }, function () { if (ta) { ta.focus(); ta.select(); } done("Copy isn't allowed here. The record is selected below, so press Ctrl+C or ⌘C."); });
+      } catch (err) { if (ta) { ta.focus(); ta.select(); } done("Copy isn't allowed here. Select the record below and copy it."); }
+    }
+  });
+  window.addEventListener("hashchange", function () { ui.msg = ""; signinPick = null; render(); });
+
+  initStore();
+})();
+</script>
